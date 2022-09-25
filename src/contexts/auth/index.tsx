@@ -5,14 +5,17 @@ import {
   useEffect,
   useState,
 } from 'react';
+import { AUTHORIZATION_TOKEN } from '../../constants/localStorage';
+import { api } from '../../services/api';
 import { noop } from '../../utils/noop';
+import { Authenticate } from './types';
 
 const DEFAULT_STATE = {
   isAuthorized: false,
-  authenticate: noop,
+  authenticate: noop as unknown as Authenticate,
 };
 
-type AuthContextType = { isAuthorized: boolean; authenticate: () => void };
+type AuthContextType = { isAuthorized: boolean; authenticate: Authenticate };
 export const AuthContext = createContext<AuthContextType>(DEFAULT_STATE);
 
 export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
@@ -27,7 +30,13 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
     setAuthorized(true);
   }, []);
 
-  const authenticate = () => {
+  const authenticate: Authenticate = async ({ email, password }) => {
+    const { data } = await api.post('/users/login', {
+      email,
+      password,
+    });
+
+    localStorage.setItem(AUTHORIZATION_TOKEN, data.token);
     setAuthorized(true);
   };
 

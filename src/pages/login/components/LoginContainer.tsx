@@ -1,12 +1,14 @@
 import {
   Box,
   Button,
+  CircularProgress,
   Heading,
   Input,
   InputGroup,
   InputLeftElement,
   Text,
 } from '@chakra-ui/react';
+import { AxiosError } from 'axios';
 import { useState } from 'react';
 import { AiFillLock, AiOutlineMail } from 'react-icons/ai';
 import { Flex } from '../../../components/primitives/Flex';
@@ -29,6 +31,10 @@ const stringsMapByMode = {
 
 export const LoginContainer = () => {
   const [mode, setMode] = useState<LoginMode>('signin');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [isLoading, setLoading] = useState(false);
   const { authenticate } = useAuth();
   const strings = stringsMapByMode[mode];
 
@@ -38,6 +44,26 @@ export const LoginContainer = () => {
       return;
     }
     setMode('signin');
+  };
+
+  const handleAuthenticate = async () => {
+    setError('');
+    if (!email || !password) {
+      setError('Empty Email/Password');
+      return;
+    }
+    if (mode === 'signin') {
+      try {
+        setLoading(true);
+        await authenticate({ email, password });
+      } catch (error) {
+        setError(
+          (error as AxiosError<{ message: string }>)?.response?.data?.message!
+        );
+      } finally {
+        setLoading(false);
+      }
+    }
   };
 
   return (
@@ -62,7 +88,14 @@ export const LoginContainer = () => {
           <InputLeftElement pointerEvents="none">
             <AiOutlineMail />
           </InputLeftElement>
-          <Input type="email" placeholder="Enter Your Email" fontSize="md" />
+          <Input
+            required
+            type="email"
+            placeholder="Enter Your Email"
+            fontSize="md"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
         </InputGroup>
 
         <InputGroup size="lg">
@@ -70,9 +103,12 @@ export const LoginContainer = () => {
             <AiFillLock />
           </InputLeftElement>
           <Input
+            required
             type="password"
             placeholder="Enter Your Password"
             fontSize="md"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
           />
         </InputGroup>
 
@@ -80,11 +116,13 @@ export const LoginContainer = () => {
           size="lg"
           color={theme.colors.primary}
           width="full"
-          onClick={authenticate}
+          onClick={handleAuthenticate}
+          type="submit"
         >
-          {strings.title}
+          {isLoading ? <CircularProgress /> : strings.title}
         </Button>
       </Flex>
+      {<Text color="red.500">{error}</Text>}
 
       <ChangeLoginMode mode={mode} onClick={handleChangeLoginMode} />
     </Flex>
