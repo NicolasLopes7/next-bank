@@ -5,10 +5,20 @@ import {
   useEffect,
   useState,
 } from 'react';
-import { AUTHORIZATION_TOKEN } from '../../constants/localStorage';
-import { api } from '../../services/api';
+import {
+  AUTHORIZATION_TOKEN,
+  REFRESH_TOKEN,
+} from '../../constants/localStorage';
+import { api, CommonHeaderProps } from '../../services/api';
 import { noop } from '../../utils/noop';
-import { AuthContextType, Authenticate, CreateAccount } from './types';
+import {
+  AuthContextType,
+  Authenticate,
+  AuthorizeProps,
+  CreateAccount,
+  CreateUserHTTPResponse,
+  LoginHTTPResponse,
+} from './types';
 
 const DEFAULT_STATE = {
   isAuthorized: false,
@@ -23,28 +33,43 @@ export const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
     DEFAULT_STATE.isAuthorized
   );
 
+  const authorize = ({ acessToken, refreshToken }: AuthorizeProps) => {
+    localStorage.setItem(AUTHORIZATION_TOKEN, acessToken);
+    localStorage.setItem(REFRESH_TOKEN, refreshToken);
+
+    api.defaults.headers = {
+      ...api.defaults.headers,
+      authorization: acessToken,
+    } as CommonHeaderProps;
+    setAuthorized(true);
+  };
+
   useEffect(() => {
-    const isAuthorized = localStorage.getItem('@next-bank:authorizationToken');
+    const isAuthorized = localStorage.getItem(AUTHORIZATION_TOKEN);
     if (!isAuthorized) return () => {};
 
     setAuthorized(true);
   }, []);
 
   const authenticate: Authenticate = async ({ email, password }) => {
-    const { data } = await api.post('/users/login', {
+    const { data } = await api.post<LoginHTTPResponse>('/users/login', {
       email,
       password,
     });
 
-    localStorage.setItem(AUTHORIZATION_TOKEN, data.token);
-    setAuthorized(true);
+    authorize({
+      acessToken: data.acessToken,
+      refreshToken: data.refreshToken,
+    });
   };
 
   const createAccount: CreateAccount = async (userData) => {
-    const { data } = await api.post('/users', userData);
+    const { data } = await api.post<CreateUserHTTPResponse>('/users', userData);
 
-    localStorage.setItem(AUTHORIZATION_TOKEN, data.token);
-    setAuthorized(true);
+    authorize({
+      acessToken: data.acessToken,
+      refreshToken: data.refreshToken,
+    });
   };
 
   return (
