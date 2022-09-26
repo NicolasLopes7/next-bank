@@ -47,7 +47,7 @@ export const SignUp = ({ changeMode }: SignUpProps) => {
         <Text>Welcome to our bank</Text>
       </Box>
 
-      <Flex style={{ gap: 8 }}>
+      <Flex style={{ gap: 8 }} mb={2}>
         <InputGroup size="lg">
           <InputLeftElement pointerEvents="none">
             <AiOutlineUser />
