@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Flex } from '../../../components/primitives/Flex';
-import { theme } from '../../../theme';
+import { Flex } from '../primitives/Flex';
+import { theme } from '../../theme';
 import { SignIn } from './SignIn';
 import { SignUp } from './SignUp';
 

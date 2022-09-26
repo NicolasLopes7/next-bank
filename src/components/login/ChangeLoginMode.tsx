@@ -1,5 +1,5 @@
 import { Divider, Highlight, Text } from '@chakra-ui/react';
-import { theme } from '../../../theme';
+import { theme } from '../../theme';
 import { LoginMode } from './LoginContainer';
 
 type ChangeLoginModeProps = { mode: LoginMode; onClick: () => void };

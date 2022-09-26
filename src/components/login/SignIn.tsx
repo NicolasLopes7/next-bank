@@ -10,27 +10,29 @@ import {
 } from '@chakra-ui/react';
 import { AxiosError } from 'axios';
 import { useState } from 'react';
-import { AiFillLock, AiOutlineMail, AiOutlineUser } from 'react-icons/ai';
-import { Flex } from '../../../components/primitives/Flex';
-import { useAuth } from '../../../contexts/auth';
-import { theme } from '../../../theme';
+import { AiFillLock, AiOutlineMail } from 'react-icons/ai';
+import { Flex } from '../primitives/Flex';
+import { useAuth } from '../../contexts/auth';
+import { theme } from '../../theme';
 import { ChangeLoginMode } from './ChangeLoginMode';
 
-type SignUpProps = { changeMode: () => void };
-export const SignUp = ({ changeMode }: SignUpProps) => {
-  const [name, setName] = useState('');
+type SignInProps = { changeMode: () => void };
+export const SignIn = ({ changeMode }: SignInProps) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setLoading] = useState(false);
-  const { createAccount } = useAuth();
+  const { authenticate } = useAuth();
 
   const handleAuthenticate = async () => {
     setError('');
-
+    if (!email || !password) {
+      setError('Empty Email/Password');
+      return;
+    }
     try {
       setLoading(true);
-      await createAccount({ email, password, name });
+      await authenticate({ email, password });
     } catch (error) {
       setError(
         (error as AxiosError<{ message: string }>)?.response?.data?.message!
@@ -43,24 +45,11 @@ export const SignUp = ({ changeMode }: SignUpProps) => {
   return (
     <Box>
       <Box mb={8}>
-        <Heading mb={2}>Sign Up!</Heading>
-        <Text>Welcome to our bank</Text>
+        <Heading mb={2}>Sign In</Heading>
+        <Text>Welcome Back!</Text>
       </Box>
 
-      <Flex style={{ gap: 8 }}>
-        <InputGroup size="lg">
-          <InputLeftElement pointerEvents="none">
-            <AiOutlineUser />
-          </InputLeftElement>
-          <Input
-            required
-            type="email"
-            placeholder="Enter Your Name"
-            fontSize="md"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-        </InputGroup>
+      <Flex style={{ gap: 8 }} mb={2}>
         <InputGroup size="lg">
           <InputLeftElement pointerEvents="none">
             <AiOutlineMail />
@@ -96,12 +85,12 @@ export const SignUp = ({ changeMode }: SignUpProps) => {
           onClick={handleAuthenticate}
           type="submit"
         >
-          {isLoading ? <CircularProgress /> : 'Sign Up'}
+          {isLoading ? <CircularProgress /> : 'Sign In'}
         </Button>
       </Flex>
       {<Text color="red.500">{error}</Text>}
 
-      <ChangeLoginMode mode={'signup'} onClick={changeMode} />
+      <ChangeLoginMode mode={'signin'} onClick={changeMode} />
     </Box>
   );
 };

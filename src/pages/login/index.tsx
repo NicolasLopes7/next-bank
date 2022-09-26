@@ -1,5 +1,5 @@
 import { LoginLayout } from '../../layouts/Login';
-import { LoginContainer } from './components/LoginContainer';
+import { LoginContainer } from '../../components/login/LoginContainer';
 
 const LoginPage = () => {
   return (
