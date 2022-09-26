@@ -7,27 +7,37 @@ import {
   InputGroup,
   InputLeftElement,
   Text,
-} from '@chakra-ui/react';
-import { AxiosError } from 'axios';
-import { useState } from 'react';
-import { AiFillLock, AiOutlineMail } from 'react-icons/ai';
-import { Flex } from '../primitives/Flex';
-import { useAuth } from '../../contexts/auth';
-import { theme } from '../../theme';
-import { ChangeLoginMode } from './ChangeLoginMode';
+  useToast,
+} from "@chakra-ui/react";
+import { AxiosError } from "axios";
+import { useState, useRef } from "react";
+import { AiFillLock, AiOutlineMail } from "react-icons/ai";
+import { Flex } from "../primitives/Flex";
+import { useAuth } from "../../contexts/auth";
+import { theme } from "../../theme";
+import { ChangeLoginMode } from "./ChangeLoginMode";
 
 type SignInProps = { changeMode: () => void };
 export const SignIn = ({ changeMode }: SignInProps) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [isLoading, setLoading] = useState(false);
   const { authenticate } = useAuth();
+  const toast = useToast();
+  const toastIdRef = useRef();
+
+  function closeToast() {
+    if (toastIdRef.current) {
+      toast.close(toastIdRef.current);
+    }
+  };
 
   const handleAuthenticate = async () => {
-    setError('');
+    setError("");
+    const messageError = error;
     if (!email || !password) {
-      setError('Empty Email/Password');
+      setError("Empty Email/Password");
       return;
     }
     try {
@@ -37,6 +47,15 @@ export const SignIn = ({ changeMode }: SignInProps) => {
       setError(
         (error as AxiosError<{ message: string }>)?.response?.data?.message!
       );
+      toast({
+        position: "top-right",
+        duration: 3000,
+        render: () => (
+          <Box color="white" p={3} bg="red.500">
+            {messageError}
+          </Box>
+        ),
+      });
     } finally {
       setLoading(false);
     }
@@ -85,12 +104,11 @@ export const SignIn = ({ changeMode }: SignInProps) => {
           onClick={handleAuthenticate}
           type="submit"
         >
-          {isLoading ? <CircularProgress /> : 'Sign In'}
+          {isLoading ? <CircularProgress /> : "Sign In"}
         </Button>
       </Flex>
-      {<Text color="red.500">{error}</Text>}
 
-      <ChangeLoginMode mode={'signin'} onClick={changeMode} />
+      <ChangeLoginMode mode={"signin"} onClick={changeMode} />
     </Box>
   );
 };
