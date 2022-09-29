@@ -99,7 +99,7 @@ export const SignUp = ({ changeMode }: SignUpProps) => {
           {isLoading ? <CircularProgress /> : 'Sign Up'}
         </Button>
       </Flex>
-      {<Text color="white">{error}</Text>}
+      {<Text color="red.500">{error}</Text>}
 
       <ChangeLoginMode mode={'signup'} onClick={changeMode} />
     </Box>
