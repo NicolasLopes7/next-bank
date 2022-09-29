@@ -22,6 +22,7 @@ export const SignUp = ({ changeMode }: SignUpProps) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setLoading] = useState(false);
   const { createAccount } = useAuth();
@@ -45,6 +46,12 @@ export const SignUp = ({ changeMode }: SignUpProps) => {
 
   const handleAuthenticate = async () => {
     setError('');
+
+    if (password !== confirmPassword) {
+      setError('Your passwords are different');
+      preventDuplicateToast();
+      throw error;
+    }
 
     try {
       setLoading(true);
@@ -105,6 +112,20 @@ export const SignUp = ({ changeMode }: SignUpProps) => {
             fontSize="md"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+          />
+        </InputGroup>
+
+        <InputGroup size="lg">
+          <InputLeftElement pointerEvents="none">
+            <AiFillLock />
+          </InputLeftElement>
+          <Input
+            required
+            type="password"
+            placeholder="Confirm your password"
+            fontSize="md"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
           />
         </InputGroup>
 

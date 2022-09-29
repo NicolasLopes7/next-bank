@@ -6,12 +6,18 @@ import {
   Input,
   InputGroup,
   InputLeftElement,
+  InputRightElement,
   Text,
   useToast,
 } from '@chakra-ui/react';
 import { AxiosError } from 'axios';
 import { useState } from 'react';
-import { AiFillLock, AiOutlineMail } from 'react-icons/ai';
+import {
+  AiFillLock,
+  AiOutlineMail,
+  AiOutlineEye,
+  AiOutlineEyeInvisible,
+} from 'react-icons/ai';
 import { Flex } from '../primitives/Flex';
 import { useAuth } from '../../contexts/auth';
 import { theme } from '../../theme';
@@ -23,6 +29,7 @@ export const SignIn = ({ changeMode }: SignInProps) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setLoading] = useState(false);
+  const [visible, setVisible] = useState('password');
   const { authenticate } = useAuth();
 
   const toast = useToast();
@@ -87,9 +94,24 @@ export const SignIn = ({ changeMode }: SignInProps) => {
           <InputLeftElement pointerEvents="none">
             <AiFillLock />
           </InputLeftElement>
+          <InputRightElement
+            onClick={() => {
+              if (visible === 'password') {
+                setVisible('string');
+              } else {
+                setVisible('password');
+              }
+            }}
+          >
+            {visible === 'string' ? (
+              <AiOutlineEyeInvisible />
+            ) : (
+              <AiOutlineEye />
+            )}
+          </InputRightElement>
           <Input
             required
-            type="password"
+            type={visible}
             placeholder="Enter Your Password"
             fontSize="md"
             value={password}
