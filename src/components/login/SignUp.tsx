@@ -7,6 +7,7 @@ import {
   InputGroup,
   InputLeftElement,
   Text,
+  useToast,
 } from '@chakra-ui/react';
 import { AxiosError } from 'axios';
 import { useState } from 'react';
@@ -25,6 +26,23 @@ export const SignUp = ({ changeMode }: SignUpProps) => {
   const [isLoading, setLoading] = useState(false);
   const { createAccount } = useAuth();
 
+  const toast = useToast();
+
+  const preventDuplicateToast = () => {
+    const id = 'uniqueToast';
+    if (!toast.isActive(id)) {
+      toast({
+        id,
+        title: 'Error',
+        description: error,
+        duration: 3000,
+        isClosable: true,
+        status: 'error',
+        position: 'top-right',
+      });
+    }
+  };
+
   const handleAuthenticate = async () => {
     setError('');
 
@@ -35,6 +53,7 @@ export const SignUp = ({ changeMode }: SignUpProps) => {
       setError(
         (error as AxiosError<{ message: string }>)?.response?.data?.message!
       );
+      preventDuplicateToast();
     } finally {
       setLoading(false);
     }
@@ -99,7 +118,6 @@ export const SignUp = ({ changeMode }: SignUpProps) => {
           {isLoading ? <CircularProgress /> : 'Sign Up'}
         </Button>
       </Flex>
-      {<Text color="red.500">{error}</Text>}
 
       <ChangeLoginMode mode={'signup'} onClick={changeMode} />
     </Box>
