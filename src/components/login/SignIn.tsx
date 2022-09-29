@@ -34,7 +34,7 @@ export const SignIn = ({ changeMode }: SignInProps) => {
 
   const toast = useToast();
 
-  const preventDuplicateToast = () => {
+  const toastErrorTemplate = () => {
     const id = 'uniqueToast';
     if (!toast.isActive(id)) {
       toast({
@@ -62,7 +62,7 @@ export const SignIn = ({ changeMode }: SignInProps) => {
       setError(
         (error as AxiosError<{ message: string }>)?.response?.data?.message!
       );
-      preventDuplicateToast();
+      toastErrorTemplate();
     } finally {
       setLoading(false);
     }

@@ -16,6 +16,7 @@ import { Flex } from '../primitives/Flex';
 import { useAuth } from '../../contexts/auth';
 import { theme } from '../../theme';
 import { ChangeLoginMode } from './ChangeLoginMode';
+import validator from 'validator';
 
 type SignUpProps = { changeMode: () => void };
 export const SignUp = ({ changeMode }: SignUpProps) => {
@@ -29,7 +30,7 @@ export const SignUp = ({ changeMode }: SignUpProps) => {
 
   const toast = useToast();
 
-  const preventDuplicateToast = () => {
+  const toastErrorTemplate = () => {
     const id = 'uniqueToast';
     if (!toast.isActive(id)) {
       toast({
@@ -47,9 +48,15 @@ export const SignUp = ({ changeMode }: SignUpProps) => {
   const handleAuthenticate = async () => {
     setError('');
 
+    if (!validator.isEmail(email)) {
+      setError('Not valid email');
+      toastErrorTemplate();
+      throw error;
+    }
+
     if (password !== confirmPassword) {
       setError('Your passwords are different');
-      preventDuplicateToast();
+      toastErrorTemplate();
       throw error;
     }
 
@@ -60,7 +67,7 @@ export const SignUp = ({ changeMode }: SignUpProps) => {
       setError(
         (error as AxiosError<{ message: string }>)?.response?.data?.message!
       );
-      preventDuplicateToast();
+      toastErrorTemplate();
     } finally {
       setLoading(false);
     }
@@ -122,7 +129,7 @@ export const SignUp = ({ changeMode }: SignUpProps) => {
           <Input
             required
             type="password"
-            placeholder="Confirm your password"
+            placeholder="Confirm Your Password"
             fontSize="md"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
