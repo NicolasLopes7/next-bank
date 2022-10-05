@@ -6,11 +6,18 @@ import {
   Input,
   InputGroup,
   InputLeftElement,
+  InputRightElement,
   Text,
+  useToast,
 } from '@chakra-ui/react';
 import { AxiosError } from 'axios';
 import { useState } from 'react';
-import { AiFillLock, AiOutlineMail } from 'react-icons/ai';
+import {
+  AiFillLock,
+  AiOutlineMail,
+  AiOutlineEye,
+  AiOutlineEyeInvisible,
+} from 'react-icons/ai';
 import { Flex } from '../primitives/Flex';
 import { useAuth } from '../../contexts/auth';
 import { theme } from '../../theme';
@@ -22,7 +29,25 @@ export const SignIn = ({ changeMode }: SignInProps) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setLoading] = useState(false);
+  const [visible, setVisible] = useState('password');
   const { authenticate } = useAuth();
+
+  const toast = useToast();
+
+  const toastErrorTemplate = () => {
+    const id = 'uniqueToast';
+    if (!toast.isActive(id)) {
+      toast({
+        id,
+        title: 'Error',
+        description: error,
+        duration: 3000,
+        isClosable: true,
+        status: 'error',
+        position: 'top-right',
+      });
+    }
+  };
 
   const handleAuthenticate = async () => {
     setError('');
@@ -37,6 +62,7 @@ export const SignIn = ({ changeMode }: SignInProps) => {
       setError(
         (error as AxiosError<{ message: string }>)?.response?.data?.message!
       );
+      toastErrorTemplate();
     } finally {
       setLoading(false);
     }
@@ -68,9 +94,24 @@ export const SignIn = ({ changeMode }: SignInProps) => {
           <InputLeftElement pointerEvents="none">
             <AiFillLock />
           </InputLeftElement>
+          <InputRightElement
+            onClick={() => {
+              if (visible === 'password') {
+                setVisible('string');
+              } else {
+                setVisible('password');
+              }
+            }}
+          >
+            {visible === 'string' ? (
+              <AiOutlineEyeInvisible />
+            ) : (
+              <AiOutlineEye />
+            )}
+          </InputRightElement>
           <Input
             required
-            type="password"
+            type={visible}
             placeholder="Enter Your Password"
             fontSize="md"
             value={password}
@@ -88,7 +129,6 @@ export const SignIn = ({ changeMode }: SignInProps) => {
           {isLoading ? <CircularProgress /> : 'Sign In'}
         </Button>
       </Flex>
-      {<Text color="red.500">{error}</Text>}
 
       <ChangeLoginMode mode={'signin'} onClick={changeMode} />
     </Box>

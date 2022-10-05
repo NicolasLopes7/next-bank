@@ -7,6 +7,7 @@ import {
   InputGroup,
   InputLeftElement,
   Text,
+  useToast,
 } from '@chakra-ui/react';
 import { AxiosError } from 'axios';
 import { useState } from 'react';
@@ -15,18 +16,49 @@ import { Flex } from '../primitives/Flex';
 import { useAuth } from '../../contexts/auth';
 import { theme } from '../../theme';
 import { ChangeLoginMode } from './ChangeLoginMode';
+import validator from 'validator';
 
 type SignUpProps = { changeMode: () => void };
 export const SignUp = ({ changeMode }: SignUpProps) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setLoading] = useState(false);
   const { createAccount } = useAuth();
 
+  const toast = useToast();
+
+  const toastErrorTemplate = () => {
+    const id = 'uniqueToast';
+    if (!toast.isActive(id)) {
+      toast({
+        id,
+        title: 'Error',
+        description: error,
+        duration: 3000,
+        isClosable: true,
+        status: 'error',
+        position: 'top-right',
+      });
+    }
+  };
+
   const handleAuthenticate = async () => {
     setError('');
+
+    if (!validator.isEmail(email)) {
+      setError('Not valid email');
+      toastErrorTemplate();
+      throw error;
+    }
+
+    if (password !== confirmPassword) {
+      setError('Your passwords are different');
+      toastErrorTemplate();
+      throw error;
+    }
 
     try {
       setLoading(true);
@@ -35,6 +67,7 @@ export const SignUp = ({ changeMode }: SignUpProps) => {
       setError(
         (error as AxiosError<{ message: string }>)?.response?.data?.message!
       );
+      toastErrorTemplate();
     } finally {
       setLoading(false);
     }
@@ -89,6 +122,20 @@ export const SignUp = ({ changeMode }: SignUpProps) => {
           />
         </InputGroup>
 
+        <InputGroup size="lg">
+          <InputLeftElement pointerEvents="none">
+            <AiFillLock />
+          </InputLeftElement>
+          <Input
+            required
+            type="password"
+            placeholder="Confirm Your Password"
+            fontSize="md"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+          />
+        </InputGroup>
+
         <Button
           size="lg"
           color={theme.colors.primary}
@@ -99,7 +146,6 @@ export const SignUp = ({ changeMode }: SignUpProps) => {
           {isLoading ? <CircularProgress /> : 'Sign Up'}
         </Button>
       </Flex>
-      {<Text color="red.500">{error}</Text>}
 
       <ChangeLoginMode mode={'signup'} onClick={changeMode} />
     </Box>
